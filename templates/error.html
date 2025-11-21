@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出错了 - 动画推荐系统</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            color: #333;
+            padding-bottom: 50px;
+        }
+
+        .navbar-bilibili {
+            background-color: #fb7299;
+            box-shadow: 0 2px 8px rgba(251, 114, 153, 0.3);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .error-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .error-icon {
+            font-size: 5rem;
+            color: #fb7299;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-bilibili {
+            background: #fb7299;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-bilibili:hover {
+            background: #fa5a8c;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(250, 90, 140, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-bilibili">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fa fa-play-circle me-2"></i>动画推荐系统
+            </a>
+        </div>
+    </nav>
+
+    <div class="error-container">
+        <div class="error-card">
+            <i class="fa fa-exclamation-circle error-icon"></i>
+            <h2>哎呀，出了点小问题</h2>
+            <p class="error-message">{{ message }}</p>
+            <a href="/" class="btn btn-bilibili">
+                <i class="fa fa-home me-1"></i>返回首页
+            </a>
+        </div>
+    </div>
+</body>
+</html>
