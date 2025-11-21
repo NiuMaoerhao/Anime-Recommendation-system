@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动画推荐系统</title>
+    <!-- 本地资源引入 -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        /* 基础样式 */
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            color: #333;
+            padding-bottom: 50px;
+        }
+
+        /* 导航栏 */
+        .navbar-bilibili {
+            background-color: #fb7299;
+            box-shadow: 0 2px 8px rgba(251, 114, 153, 0.3);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 卡片样式 - 响应式调整 */
+        .anime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        @media (max-width: 768px) {
+            .anime-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .anime-card {
+            background-color: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .anime-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #fb7299;
+        }
+        .anime-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* 图片尺寸与过渡 */
+        .anime-img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .anime-card:hover .anime-img {
+            transform: scale(1.05);
+        }
+        .img-container {
+            overflow: hidden;
+        }
+
+        /* 卡片内容 */
+        .card-body {
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 0.9rem;
+            margin: 0 0 8px 0;
+            height: 36px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            transition: color 0.2s;
+        }
+        .anime-card:hover .card-title {
+            color: #fb7299;
+        }
+
+        /* 类型标签 */
+        .genre-badge {
+            background-color: #f2f2f2;
+            color: #666;
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin: 0 2px 3px 0;
+            transition: all 0.2s;
+        }
+        .anime-card:hover .genre-badge {
+            background-color: #ffe4eb;
+        }
+
+        /* 统计信息 */
+        .stats {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 5px;
+        }
+        .score {
+            color: #ff7d00;
+            font-weight: bold;
+        }
+
+        /* 筛选区 */
+        .filter-panel {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e5e5;
+            transition: box-shadow 0.3s;
+        }
+        .filter-panel:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .genre-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .genre-label {
+            background: #f7f7f7;
+            border: 1px solid #e5e5e5;
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .genre-checkbox {
+            display: none;
+        }
+        .genre-checkbox:checked + .genre-label {
+            background: #fb7299;
+            color: white;
+            border-color: #fb7299;
+            transform: scale(1.05);
+        }
+        .genre-label:hover:not(.checked) {
+            background: #f0f0f0;
+            transform: scale(1.02);
+        }
+
+        /* 标题和按钮 */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+            padding-left: 6px;
+            border-left: 3px solid #fb7299;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 8px;
+            color: #fb7299;
+        }
+
+        .btn-bilibili {
+            background: #fb7299;
+            color: white;
+            border: none;
+            padding: 5px 18px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-bilibili:hover {
+            background: #fa5a8c;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(250, 90, 140, 0.3);
+        }
+        .btn-bilibili:active {
+            transform: translateY(0);
+        }
+
+        /* 加载动画 */
+        .loader {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 20px 0;
+        }
+        .loader-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fb7299;
+            animation: bounce 1.4s infinite;
+        }
+        .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%,80%,100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* 空状态优化 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
+        /* 通知提示 */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid #fb7299;
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s;
+        }
+        .toast-notification.show {
+            transform: translateX(0);
+        }
+
+        /* 推荐理由样式优化 */
+        .recommend-reason {
+            font-size: 0.7rem;
+            color: #66cc33;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #f0f0f0;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- 通知提示组件 -->
+    <div class="toast-notification" id="toast">
+        <span id="toastMessage">操作成功</span>
+    </div>
+
+
+    <nav class="navbar navbar-bilibili">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fa fa-play-circle me-2"></i>动画推荐系统
+            </a>
+            <div class="navbar-nav d-flex flex-row">
+                {% if session.username %}
+                <span class="nav-link text-white mx-2">欢迎，{{ session.username }}</span>
+                <a class="nav-link text-white mx-2" href="{{ url_for('logout') }}">
+                    <i class="fa fa-sign-out me-1"></i>退出登录
+                </a>
+                {% else %}
+                <a class="nav-link text-white mx-2" href="{{ url_for('login') }}">
+                    <i class="fa fa-sign-in me-1"></i>登录
+                </a>
+                <a class="nav-link text-white mx-2" href="{{ url_for('register') }}">
+                    <i class="fa fa-user-plus me-1"></i>注册
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- 筛选面板 -->
+        <div class="filter-panel">
+            <h3 class="section-title">
+                <i class="fa fa-filter"></i>选择喜欢的动画类型
+            </h3>
+            <form id="recommendForm">
+                <div class="genre-selector">
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Comedy" id="comedy">
+                    <label class="genre-label" for="comedy">喜剧</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Action" id="action">
+                    <label class="genre-label" for="action">动作</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Drama" id="drama">
+                    <label class="genre-label" for="drama">剧情</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Fantasy" id="fantasy">
+                    <label class="genre-label" for="fantasy">奇幻</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Romance" id="romance">
+                    <label class="genre-label" for="romance">爱情</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Sci-Fi" id="sci-fi">
+                    <label class="genre-label" for="sci-fi">科幻</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Sports" id="sports">
+                    <label class="genre-label" for="sports">运动</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Mystery" id="mystery">
+                    <label class="genre-label" for="mystery">悬疑</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Horror" id="horror">
+                    <label class="genre-label" for="horror">恐怖</label>
+
+                    <input type="checkbox" class="genre-checkbox" name="genres" value="Adventure" id="adventure">
+                    <label class="genre-label" for="adventure">冒险</label>
+                </div>
+
+                <div class="score-filter mt-3">
+                    <label class="form-label">最低评分：</label>
+                    <select class="form-select form-select-sm" name="min_score" style="width: auto; display: inline-block;">
+                        <option value="0">不限制</option>
+                        <option value="5">5分以上</option>
+                        <option value="6">6分以上</option>
+                        <option value="7">7分以上</option>
+                        <option value="8">8分以上</option>
+                        <option value="8.5">8.5分以上</option>
+                        <option value="9">9分以上</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clearSelection">
+                        <i class="fa fa-eraser me-1"></i>清除选择
+                    </button>
+                    <button type="submit" class="btn btn-bilibili">
+                        <i class="fa fa-search me-1"></i>获取推荐
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 热门动画区域 -->
+        <h3 class="section-title">
+            <i class="fa fa-fire"></i>热门动画
+        </h3>
+        <div class="anime-grid mb-6" id="popularAnimes">
+            {% if popular_animes and popular_animes|length > 0 %}
+                {% for anime in popular_animes %}
+                <div class="anime-card">
+                    <a href="/anime/{{ anime.uid }}" class="anime-link">
+                        <div class="img-container">
+                            {% if anime.img_url %}
+                                <img src="{{ anime.img_url }}" class="anime-img" alt="{{ anime.title }}"
+                                     onerror="this.src='https://via.placeholder.com/200x110?text=无图'">
+                            {% else %}
+                                <img src="https://via.placeholder.com/200x110?text=无图" class="anime-img">
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ anime.title }}</h5>
+                            <div>
+                                {% for g in anime.genre[:2] %}
+                                <span class="genre-badge">{{ g }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="stats">
+                                <span class="score">{{ anime.score | default('0') }}</span>
+                                <span> | </span>
+                                <span>{{ (anime.members | default(0) | int / 10000) | round(1) }}万</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state col-12">
+                    <i class="fa fa-film"></i>
+                    <p>暂无热门动画数据</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 推荐结果区域 -->
+        <h3 class="section-title">
+            <i class="fa fa-star"></i>为你推荐
+        </h3>
+        <div class="anime-grid" id="recommendations">
+            <div class="empty-state col-12">
+                <i class="fa fa-info-circle"></i>
+                <p>选择动画类型，获取个性化推荐</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 通知提示功能
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 清除选择功能
+        document.getElementById('clearSelection').addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.genre-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            showToast('已清除所有选择');
+        });
+
+        // 表单提交处理
+        document.getElementById('recommendForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const recommendationsDiv = document.getElementById('recommendations');
+            const checkedGenres = Array.from(formData.getAll('genres'));
+
+            // 验证至少选择一个类型
+            if (checkedGenres.length === 0) {
+                showToast('请至少选择一种动画类型', 2000);
+                return;
+            }
+
+            // 显示加载动画
+            recommendationsDiv.innerHTML = `
+                <div class="loader">
+                    <div class="loader-dot"></div>
+                    <div class="loader-dot"></div>
+                    <div class="loader-dot"></div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    recommendationsDiv.innerHTML = '';
+                    if (result.length === 0) {
+                        recommendationsDiv.innerHTML = `
+                            <div class="empty-state col-12">
+                                <i class="fa fa-frown-o"></i>
+                                <p>未找到匹配的动画，请尝试其他类型</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // 渲染推荐结果
+                    result.forEach(anime => {
+                        const imgUrl = anime.img_url || 'https://via.placeholder.com/200x110?text=无图';
+                        const genres = anime.genre.map(g => `<span class="genre-badge">${g}</span>`).slice(0, 2).join('');
+                        const memberCount = (parseInt(anime.members || 0) / 10000).toFixed(1);
+
+                        recommendationsDiv.innerHTML += `
+                            <div class="anime-card">
+                                <a href="/anime/${anime.uid}" class="anime-link">
+                                    <div class="img-container">
+                                        <img src="${imgUrl}" class="anime-img" alt="${anime.title}"
+                                             onerror="this.src='https://via.placeholder.com/200x110?text=无图'">
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">${anime.title}</h5>
+                                        <div>${genres}</div>
+                                        <div class="stats">
+                                            <span class="score">${anime.score || '0'}</span>
+                                            <span> | </span>
+                                            <span>${memberCount}万</span>
+                                        </div>
+                                        <div class="recommend-reason">
+                                            <i class="fa fa-lightbulb-o me-1"></i>${anime.reason || '推荐理由'}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        `;
+                    });
+
+                    showToast(`为您找到 ${result.length} 部匹配的动画`, 2000);
+                } else {
+                    recommendationsDiv.innerHTML = `
+                        <div class="empty-state col-12">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <p>${result.error || '推荐失败'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('推荐请求失败:', error);
+                recommendationsDiv.innerHTML = `
+                    <div class="empty-state col-12">
+                        <i class="fa fa-wifi"></i>
+                        <p>网络错误，请重试</p>
+                    </div>
+                `;
+            }
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为类型选择添加动画效果
+            const genreLabels = document.querySelectorAll('.genre-label');
+            genrelabel.forEach(label => {
+                label.addEventListener('click', function() {
+                    const checkbox = this.previousElementSibling;
+                    checkbox.checked = !checkbox.checked;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
